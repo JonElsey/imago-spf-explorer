@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="/mnt/c/Users/spspa/OneDrive - The University of Liverpool/imago-spf-explorer"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GPKG="$REPO/data/SPF_LSOA_2023.gpkg"
 OUT="$REPO/tiles/lsoa.pmtiles"
 

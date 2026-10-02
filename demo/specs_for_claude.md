@@ -287,10 +287,10 @@ Run once to generate the intermediate .pbf tile pyramid in `tiles/`. Requires OS
 > ⚠️ **PROJ/GDAL version conflict:** OSGeo4W ships an older `proj.db`. Override with the conda environment's newer databases before running:
 
 ```powershell
-$env:PROJ_DATA = "C:\Users\spspa\anaconda3\envs\raster_env\Library\share\proj"
-$env:GDAL_DATA = "C:\Users\spspa\anaconda3\envs\raster_env\Library\share\gdal"
+$env:PROJ_DATA = "$env:CONDA_PREFIX\Library\share\proj"
+$env:GDAL_DATA = "$env:CONDA_PREFIX\Library\share\gdal"
 
-& "C:\OSGeo4W\bin\ogr2ogr.exe" `
+& "$env:OSGEO4W_ROOT\bin\ogr2ogr.exe" `
   -f MVT tiles `
   data\SPF_LSOA_2023.gpkg `
   -t_srs EPSG:4326 `
@@ -316,7 +316,7 @@ Converts the `tiles/` directory into a single `tiles/lsoa.pmtiles` file:
 Run with the `raster_env` conda environment:
 
 ```powershell
-C:\Users\spspa\anaconda3\envs\raster_env\python.exe pipeline\build_pmtiles.py
+python pipeline\build_pmtiles.py
 ```
 
 Output: `tiles/lsoa.pmtiles` — **committed to repo**.

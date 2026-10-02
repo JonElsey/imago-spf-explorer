@@ -1,19 +1,21 @@
 # build_tiles.ps1 — one-time tile build using GDAL MVT driver (Windows / OSGeo4W)
 # Run from the repo root: .\pipeline\build_tiles.ps1
 #
-# Requires ogr2ogr from OSGeo4W (already at C:\OSGeo4W\bin\ogr2ogr.exe)
+# Requires ogr2ogr from OSGeo4W. Set OSGEO4W_ROOT if installed outside the default.
 # No WSL, tippecanoe, or Docker needed.
 #
 # Note: GDAL MVT generation at z5-z14 for 46,844 features takes ~30-60 min.
 # If you want a quick test first, change MAXZOOM=12 and re-run with MAXZOOM=14 later.
 
-$OGR = "C:\OSGeo4W\bin\ogr2ogr.exe"
+if (-not $env:OSGEO4W_ROOT) { $env:OSGEO4W_ROOT = "C:\OSGeo4W" }
+$OGR = "$env:OSGEO4W_ROOT\bin\ogr2ogr.exe"
 $GPKG = "data\SPF_LSOA_2023.gpkg"
 $TILES = "tiles"
 
-# Fix PROJ/GDAL conflict between OSGeo4W and conda — point to conda's newer databases
-$env:PROJ_DATA = "C:\Users\spspa\anaconda3\envs\raster_env\Library\share\proj"
-$env:GDAL_DATA = "C:\Users\spspa\anaconda3\envs\raster_env\Library\share\gdal"
+# Fix PROJ/GDAL conflict between OSGeo4W and conda — point to conda's newer
+# databases. Requires the raster_env conda environment to be active.
+$env:PROJ_DATA = "$env:CONDA_PREFIX\Library\share\proj"
+$env:GDAL_DATA = "$env:CONDA_PREFIX\Library\share\gdal"
 
 if (Test-Path $TILES) {
     Write-Host "Removing existing tiles/ directory..."

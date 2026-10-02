@@ -1,47 +1,22 @@
 // SPF Explorer — main.js
 
+import { valueToColor } from './lib/color.js';
+import { ordinal, cloudIcon } from './lib/format.js';
+import { parseCountry } from './lib/geo.js';
+import {
+  findPeers,
+  findInRange,
+  searchAreas,
+  findSunnyNear as selectSunnyNear,
+  GEO_RADIUS_KM,
+  PEER_PCT_BAND,
+} from './lib/selectors.js';
+import { encodeURLState, decodeURLState } from './lib/urlState.js';
+
 const DATA_PATH     = '../data/processed/spf-data.json';
 const PMTILES_PATH  = '../tiles/lsoa.pmtiles';
 const UK_CENTER     = [-3.0, 55.0];
 const UK_ZOOM       = 5;
-const GEO_RADIUS_KM = 10;
-
-// Single hue (this app's own brand blue, #1877CF), pale/sunny (low value) to
-// dark navy/cloudy (high value), in increasing-value order. Built in OKLCH
-// with the hue held constant and lightness stepped evenly, so every step
-// stays visually distinct end to end — the original hand-picked blue ramp
-// had 5 of 9 adjacent steps below the minimum perceptible-lightness-gap.
-const COLOR_STOPS = [
-  '#d8eaff', '#aed4ff', '#83beff', '#52a6ff', '#398fe7',
-  '#1e79ce', '#0063b3', '#004f91', '#003b70', '#002950',
-];
-
-const SUNNY_PCT_THRESHOLD = 90; // top 10% nationally across all years
-const PEER_PCT_BAND = 2.5; // clicking an area highlights peers within +/- this many percentile points
-
-function hexToRgb(hex) {
-  const n = parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-
-function rgbToHex([r, g, b]) {
-  return '#' + [r, g, b].map(c => Math.round(c).toString(16).padStart(2, '0')).join('');
-}
-
-// Maps a raw value to a colour along COLOR_STOPS, normalised against the
-// dataset-wide min/max (spfData.meta), so a given value renders identically
-// in every year rather than shifting with that year's own distribution.
-function valueToColor(value) {
-  const { value_min, value_max } = spfData.meta;
-  const t = Math.min(1, Math.max(0, (value - value_min) / (value_max - value_min)));
-  const idx = t * (COLOR_STOPS.length - 1);
-  const i0 = Math.floor(idx);
-  const i1 = Math.min(i0 + 1, COLOR_STOPS.length - 1);
-  const frac = idx - i0;
-  const c0 = hexToRgb(COLOR_STOPS[i0]);
-  const c1 = hexToRgb(COLOR_STOPS[i1]);
-  return rgbToHex(c0.map((v, i) => v + (c1[i] - v) * frac));
-}
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -151,11 +126,12 @@ async function loadData() {
 // ── Feature-state choropleth ──────────────────────────────────────────────────
 
 function applyYearStates(year) {
+  const { value_min, value_max } = spfData.meta;
   for (const [code, area] of Object.entries(spfData.areas)) {
     const yd = area[year];
     map.setFeatureState(
       { source: 'lsoa', sourceLayer: 'lsoa', id: code },
-      { color: yd ? valueToColor(yd.value) : null },
+      { color: yd ? valueToColor(yd.value, value_min, value_max) : null },
     );
   }
 }
@@ -320,11 +296,7 @@ function selectArea(code, fly = false) {
   map.setPaintProperty('lsoa-fill', 'fill-opacity', 0.35);
 
   if (yd) {
-    const peers = [];
-    for (const [otherCode, otherArea] of Object.entries(spfData.areas)) {
-      const otherYd = otherArea[currentYear];
-      if (otherYd && Math.abs(otherYd.pct - yd.pct) <= PEER_PCT_BAND) peers.push(otherCode);
-    }
+    const peers = findPeers(spfData.areas, currentYear, yd.pct);
     peerCount = peers.length;
     setHighlightFilter(codesFilter(peers));
   } else {
@@ -335,7 +307,9 @@ function selectArea(code, fly = false) {
   infoCodeEl.textContent = code;
   infoValue.textContent  = yd ? `${yd.value.toFixed(1)}` : '—';
   infoPctEl.textContent  = yd ? `${ordinal(yd.pct)} percentile` : '—';
-  infoPctEl.style.color  = yd ? valueToColor(yd.value) : 'inherit';
+  infoPctEl.style.color  = yd
+    ? valueToColor(yd.value, spfData.meta.value_min, spfData.meta.value_max)
+    : 'inherit';
   infoPeersNote.textContent = yd
     ? `${peerCount.toLocaleString()} areas within ±${PEER_PCT_BAND} percentile nationally`
     : '';
@@ -364,17 +338,6 @@ function clearSelection() {
   pushURLState();
 }
 
-function ordinal(n) {
-  const rem100 = n % 100;
-  if (rem100 >= 11 && rem100 <= 13) return `${n}th`;
-  switch (n % 10) {
-    case 1: return `${n}st`;
-    case 2: return `${n}nd`;
-    case 3: return `${n}rd`;
-    default: return `${n}th`;
-  }
-}
-
 // ── Value-range slider ───────────────────────────────────────────────────────
 
 function initRangeSlider() {
@@ -400,11 +363,7 @@ function applyRange(lo, hi) {
   rangeHi = hi;
   updateRangeReadout(lo, hi);
 
-  const codes = [];
-  for (const [code, area] of Object.entries(spfData.areas)) {
-    const yd = area[currentYear];
-    if (yd && yd.value >= lo && yd.value <= hi) codes.push(code);
-  }
+  const codes = findInRange(spfData.areas, currentYear, lo, hi);
 
   map.setFilter('lsoa-selected', neverFilter());
   setHighlightFilter(codesFilter(codes));
@@ -453,13 +412,7 @@ searchInput.addEventListener('input', (e) => {
 
 function runSearch(q) {
   if (!spfData) return; // data still loading — re-run once it's ready, see init()
-  const hits = [];
-  for (const [code, area] of Object.entries(spfData.areas)) {
-    if (code.toLowerCase().includes(q) || (area.name && area.name.toLowerCase().includes(q))) {
-      hits.push({ code, name: area.name });
-      if (hits.length >= 8) break;
-    }
-  }
+  const hits = searchAreas(spfData.areas, q);
   if (!hits.length) { searchResults.style.display = 'none'; return; }
   searchResults.innerHTML = hits.map(h => `
     <div class="search-result" data-code="${h.code}">
@@ -485,32 +438,13 @@ document.addEventListener('click', (e) => {
 
 // ── Geo helpers ───────────────────────────────────────────────────────────────
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2
-    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 // Returns up to 10 closest areas in the sunniest 10% nationally (across all
 // years) within GEO_RADIUS_KM, sorted by distance, plus how many qualified
 // in total (dense sunny regions — e.g. the south coast — routinely have
 // far more than 10 within range).
 function findSunnyNear(lat, lon, label = 'your location') {
   geoResults.innerHTML = '';
-  const candidates = [];
-  for (const [code, area] of Object.entries(spfData.areas)) {
-    if (area.lat == null || area.lon == null) continue;
-    const yd = area[currentYear];
-    if (!yd || yd.pct < SUNNY_PCT_THRESHOLD) continue;
-    const distKm = haversineKm(lat, lon, area.lat, area.lon);
-    if (distKm <= GEO_RADIUS_KM) candidates.push({ code, area, distKm });
-  }
-  candidates.sort((a, b) => a.distKm - b.distKm);
-  const nearest = candidates.slice(0, 10);
-  const total = candidates.length;
+  const { nearest, total } = selectSunnyNear(spfData.areas, currentYear, lat, lon);
 
   map.flyTo({ center: [lon, lat], zoom: 11, speed: 1.4 });
 
@@ -526,14 +460,6 @@ function findSunnyNear(lat, lon, label = 'your location') {
     : `${total} sunniest-10% area${total !== 1 ? 's' : ''} within ${GEO_RADIUS_KM} km of ${label} — fetching weather…`;
 
   return { nearest, total };
-}
-
-function cloudIcon(cloud, isDay) {
-  if (!isDay) return '🌙';
-  if (cloud <= 20) return '☀️';
-  if (cloud <= 50) return '⛅';
-  if (cloud <= 80) return '🌥️';
-  return '☁️';
 }
 
 async function fetchWeatherForAreas(areas) {
@@ -690,14 +616,6 @@ function renderGeoResults(nearest, total, weatherData, label, country = 'england
 
   geoResults.innerHTML = rows;
   showInfoPanel('geo');
-}
-
-function parseCountry(addr = {}) {
-  const state = (addr.state || '').toLowerCase();
-  if (state.includes('scotland'))         return 'scotland';
-  if (state.includes('wales') || state.includes('cymru')) return 'wales';
-  if (state.includes('northern ireland')) return 'northern_ireland';
-  return 'england';
 }
 
 async function geocodePlace(query) {
@@ -927,36 +845,38 @@ infoClose.addEventListener('click', () => clearSelection());
 // ── URL state ─────────────────────────────────────────────────────────────────
 
 function pushURLState() {
-  const params = new URLSearchParams();
-  if (selectedCode) params.set('area', selectedCode);
-  if (rangeActive) params.set('range', `${rangeLo}-${rangeHi}`);
-  if (currentYear !== spfData?.meta.years.at(-1)) params.set('year', currentYear);
-  const qs = params.toString();
+  const qs = encodeURLState({
+    selectedCode,
+    rangeActive,
+    rangeLo,
+    rangeHi,
+    year: currentYear,
+    latestYear: spfData?.meta.years.at(-1),
+  });
   history.replaceState({}, '', qs ? `?${qs}` : window.location.pathname);
 }
 
 function restoreURLState() {
-  const params = new URLSearchParams(window.location.search);
-  const yearParam = parseInt(params.get('year') || '');
-  if (yearParam && spfData.meta.years.includes(yearParam)) {
-    currentYear = yearParam;
-    yearDisplay.textContent = yearParam;
+  const { years, value_min, value_max } = spfData.meta;
+  const { year, area, range } = decodeURLState(window.location.search, {
+    years,
+    valueMin: value_min,
+    valueMax: value_max,
+  });
+
+  if (year) {
+    currentYear = year;
+    yearDisplay.textContent = year;
     syncYearControl();
-    applyYearStates(yearParam);
+    applyYearStates(year);
   }
 
-  const area = params.get('area');
   if (area && spfData.areas[area]) { selectArea(area, true); return; }
 
-  const rangeParam = params.get('range') || '';
-  const [loStr, hiStr] = rangeParam.split('-');
-  const lo = parseFloat(loStr);
-  const hi = parseFloat(hiStr);
-  const { value_min, value_max } = spfData.meta;
-  if (!Number.isNaN(lo) && !Number.isNaN(hi) && lo <= hi && lo >= value_min && hi <= value_max) {
-    rangeLoInput.value = lo;
-    rangeHiInput.value = hi;
-    applyRange(lo, hi);
+  if (range) {
+    rangeLoInput.value = range.lo;
+    rangeHiInput.value = range.hi;
+    applyRange(range.lo, range.hi);
   }
 }
 

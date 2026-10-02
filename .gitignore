@@ -8,18 +8,18 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
+/.eggs/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
+/wheels/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -217,3 +217,12 @@ tiles/**/metadata.json
 data/processed/spf_all_years.csv
 data/processed/boundaries.geojson
 data/processed/tiles.mbtiles
+
+# Claude code settings
+.claude/settings.local.json
+
+# GitHub pages output not needed
+_site/
+
+# node dev tooling
+node_modules/
