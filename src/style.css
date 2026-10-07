@@ -182,8 +182,6 @@ body {
   color: var(--light-grey);
 }
 
-#about-content.hidden { display: none; }
-
 /* ── Map ────────────────────────────────────────────────── */
 
 #map { flex: 1; }
@@ -290,17 +288,24 @@ body {
   overflow-y: auto;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
-
 .search-result {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: inherit;
+  font: inherit;
   padding: 0.55rem 0.75rem;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .search-result:last-child { border-bottom: none; }
-.search-result:hover { background: rgba(255,255,255,0.06); }
-.search-result-name { font-size: 0.85rem; }
-.search-result-code { font-size: 0.75rem; color: var(--grey); font-family: monospace; }
+.search-result:hover,
+.search-result:focus-visible { background: rgba(255,255,255,0.06); }
+.search-result-name { display: block; font-size: 0.85rem; }
+.search-result-code { display: block; font-size: 0.75rem; color: var(--grey); font-family: monospace; }
 
 /* ── Buttons ────────────────────────────────────────────── */
 
@@ -547,9 +552,6 @@ body {
 #legend-gradient {
   height: 10px;
   border-radius: 5px;
-  background: linear-gradient(to right,
-    #d8eaff, #aed4ff, #83beff, #52a6ff, #398fe7,
-    #1e79ce, #0063b3, #004f91, #003b70, #002950);
 }
 
 #legend-labels {
