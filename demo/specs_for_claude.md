@@ -212,7 +212,7 @@ Tiles (geometry) and data (SPF values) are kept strictly separate. Tiles are bui
 
 ### 4.4 Colour ramp
 
-Continuous, not discrete. `COLOR_STOPS` in `main.js` holds 10 hex values, one hue (this app's brand blue, `#1877CF`), pale/sunniest → dark navy/cloudiest; `valueToColor(value)` normalises the value against `meta.value_min`/`value_max` and linearly interpolates the RGB channels between the two nearest stops. Identical across years since the min/max are fixed once, globally.
+Continuous, not discrete. `COLOUR_STOPS` in `main.js` holds 10 hex values, one hue (this app's brand blue, `#1877CF`), pale/sunniest → dark navy/cloudiest; `valueToColor(value)` normalises the value against `meta.value_min`/`value_max` and linearly interpolates the RGB channels between the two nearest stops. Identical across years since the min/max are fixed once, globally.
 
 > **Why not the original hand-picked blue ramp?** It measured badly: 5 of its 9 adjacent steps fell below the minimum perceptible-lightness-gap (OKLCH ΔL ≥ 0.06), concentrated in the value range most UK areas actually occupy — areas that were meaningfully different in cloud probability looked nearly identical on the map. A two-hue warm/cool version was tried and rejected in favour of staying single-hue; the fix that shipped holds the brand blue's hue constant and steps OKLCH lightness evenly across all 10 stops, so every step stays visually distinct end to end without introducing a second hue.
 

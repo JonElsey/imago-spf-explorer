@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { findPeers, PEER_PCT_BAND } from '../lib/selectors.ts';
 import { ordinal } from '../lib/format.ts';
-import { valueToColor } from '../lib/color.ts';
+import { valueToColor } from '../lib/colour.ts';
 import type { Dataset } from '../lib/types.ts';
 
 type Props = {

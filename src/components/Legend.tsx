@@ -1,6 +1,6 @@
-// legend for the map, showing the color gradient and min/max values
+// legend for the map, showing the colour gradient and min/max values
 
-import { COLOR_STOPS } from '../lib/color.ts';
+import { COLOUR_STOPS } from '../lib/colour.ts';
 
 type Props = { valueMin: number; valueMax: number };
 
@@ -10,7 +10,7 @@ export function Legend({ valueMin, valueMax }: Props) {
       <h4>Legend</h4>
       <div
         id="legend-gradient"
-        style={{ background: `linear-gradient(to right, ${COLOR_STOPS.join(', ')})` }}
+        style={{ background: `linear-gradient(to right, ${COLOUR_STOPS.join(', ')})` }}
       />
       <div id="legend-labels">
         <span id="legend-min">{valueMin.toFixed(1)}</span>

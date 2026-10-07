@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 
-import { hexToRgb, rgbToHex, valueToColor, COLOR_STOPS } from '../src/lib/color.ts';
+import { hexToRgb, rgbToHex, valueToColor, COLOUR_STOPS } from '../src/lib/colour.ts';
 import { ordinal, cloudIcon } from '../src/lib/format.ts';
 import { haversineKm, parseCountry } from '../src/lib/geo.ts';
 
 describe('color', () => {
   it('round-trips hex through rgb', () => {
-    for (const hex of COLOR_STOPS) expect(rgbToHex(hexToRgb(hex))).toBe(hex);
+    for (const hex of COLOUR_STOPS) expect(rgbToHex(hexToRgb(hex))).toBe(hex);
   });
 
   it('pads single-digit channels', () => {
@@ -14,21 +14,21 @@ describe('color', () => {
   });
 
   it('maps the dataset endpoints to the ends of the ramp', () => {
-    expect(valueToColor(50, 50, 90)).toBe(COLOR_STOPS[0]);
-    expect(valueToColor(90, 50, 90)).toBe(COLOR_STOPS.at(-1));
+    expect(valueToColor(50, 50, 90)).toBe(COLOUR_STOPS[0]);
+    expect(valueToColor(90, 50, 90)).toBe(COLOUR_STOPS.at(-1));
   });
 
   it('clamps values outside the dataset range', () => {
-    expect(valueToColor(10, 50, 90)).toBe(COLOR_STOPS[0]);
-    expect(valueToColor(999, 50, 90)).toBe(COLOR_STOPS.at(-1));
+    expect(valueToColor(10, 50, 90)).toBe(COLOUR_STOPS[0]);
+    expect(valueToColor(999, 50, 90)).toBe(COLOUR_STOPS.at(-1));
   });
 
   it('interpolates between adjacent stops', () => {
     // 9 gaps across the ramp, so an exact ninth lands on a stop
-    expect(valueToColor(50 + 40 / 9, 50, 90)).toBe(COLOR_STOPS[1]);
+    expect(valueToColor(50 + 40 / 9, 50, 90)).toBe(COLOUR_STOPS[1]);
     const mid = valueToColor(50 + 20 / 9, 50, 90);
-    expect(mid).not.toBe(COLOR_STOPS[0]);
-    expect(mid).not.toBe(COLOR_STOPS[1]);
+    expect(mid).not.toBe(COLOUR_STOPS[0]);
+    expect(mid).not.toBe(COLOUR_STOPS[1]);
   });
 
   it('is independent of the year — same value, same colour', () => {
