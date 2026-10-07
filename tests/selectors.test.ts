@@ -7,11 +7,12 @@ import {
   findSunnyNear,
   SUNNY_PCT_THRESHOLD,
   GEO_RADIUS_KM,
-} from '../app/lib/selectors.js';
-import { haversineKm } from '../app/lib/geo.js';
-import { areas, meta, testMeta, latestYear } from './fixture.js';
+} from '../src/lib/selectors.ts';
+import { haversineKm } from '../src/lib/geo.ts';
+import { areas, meta, testMeta, latestYear } from './fixture.ts';
 
 const { seedCode, seedLat, seedLon, missingYearCode } = testMeta;
+const seed = { lat: seedLat, lon: seedLon };
 
 describe('findPeers', () => {
   it('includes the area itself', () => {
@@ -37,10 +38,6 @@ describe('findPeers', () => {
 
   it('skips areas with no data for that year', () => {
     expect(findPeers(areas, latestYear, 50, 100)).not.toContain(missingYearCode);
-  });
-
-  it('accepts the year as a number or a string', () => {
-    expect(findPeers(areas, latestYear, 90)).toEqual(findPeers(areas, String(latestYear), 90));
   });
 });
 
@@ -108,7 +105,7 @@ describe('searchAreas', () => {
 
 describe('findSunnyNear', () => {
   it('finds the cluster around the seed point, nearest first', () => {
-    const { nearest, total } = findSunnyNear(areas, latestYear, seedLat, seedLon);
+    const { nearest, total } = findSunnyNear(areas, latestYear, seed);
     expect(total).toBe(14);
     expect(nearest).toHaveLength(10); // capped
     expect(nearest[0].code).toBe(seedCode);
@@ -119,39 +116,39 @@ describe('findSunnyNear', () => {
   });
 
   it('only returns areas at or above the sunny threshold', () => {
-    const { nearest } = findSunnyNear(areas, latestYear, seedLat, seedLon);
+    const { nearest } = findSunnyNear(areas, latestYear, seed);
     for (const { code } of nearest) {
       expect(areas[code][latestYear].pct).toBeGreaterThanOrEqual(SUNNY_PCT_THRESHOLD);
     }
   });
 
   it('only returns areas inside the radius', () => {
-    const { nearest } = findSunnyNear(areas, latestYear, seedLat, seedLon);
+    const { nearest } = findSunnyNear(areas, latestYear, seed);
     for (const { area } of nearest) {
-      expect(haversineKm(seedLat, seedLon, area.lat, area.lon)).toBeLessThanOrEqual(GEO_RADIUS_KM);
+      expect(haversineKm(seed, area)).toBeLessThanOrEqual(GEO_RADIUS_KM);
     }
   });
 
   it('returns nothing in open water far from any area', () => {
-    const { nearest, total } = findSunnyNear(areas, latestYear, 0, 0);
+    const { nearest, total } = findSunnyNear(areas, latestYear, { lat: 0, lon: 0 });
     expect(nearest).toEqual([]);
     expect(total).toBe(0);
   });
 
   it('honours a wider radius', () => {
-    const tight = findSunnyNear(areas, latestYear, seedLat, seedLon, { radiusKm: 1 });
-    const loose = findSunnyNear(areas, latestYear, seedLat, seedLon, { radiusKm: 500 });
+    const tight = findSunnyNear(areas, latestYear, seed, { radiusKm: 1 });
+    const loose = findSunnyNear(areas, latestYear, seed, { radiusKm: 500 });
     expect(loose.total).toBeGreaterThan(tight.total);
   });
 
   it('reports the true total even when the returned list is capped', () => {
-    const { nearest, total } = findSunnyNear(areas, latestYear, seedLat, seedLon, { limit: 3 });
+    const { nearest, total } = findSunnyNear(areas, latestYear, seed, { limit: 3 });
     expect(nearest).toHaveLength(3);
     expect(total).toBe(14);
   });
 
   it('skips areas with no data for that year', () => {
-    const { nearest } = findSunnyNear(areas, latestYear, seedLat, seedLon, { radiusKm: 100000 });
+    const { nearest } = findSunnyNear(areas, latestYear, seed, { radiusKm: 100000 });
     expect(nearest.map(n => n.code)).not.toContain(missingYearCode);
   });
 });

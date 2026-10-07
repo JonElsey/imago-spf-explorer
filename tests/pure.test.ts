@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 
-import { hexToRgb, rgbToHex, valueToColor, COLOR_STOPS } from '../app/lib/color.js';
-import { ordinal, cloudIcon } from '../app/lib/format.js';
-import { haversineKm, parseCountry } from '../app/lib/geo.js';
+import { hexToRgb, rgbToHex, valueToColor, COLOR_STOPS } from '../src/lib/color.ts';
+import { ordinal, cloudIcon } from '../src/lib/format.ts';
+import { haversineKm, parseCountry } from '../src/lib/geo.ts';
 
 describe('color', () => {
   it('round-trips hex through rgb', () => {
@@ -57,35 +57,35 @@ describe('ordinal', () => {
 
 describe('cloudIcon', () => {
   it('is the moon at night regardless of cloud', () => {
-    expect(cloudIcon(0, 0)).toBe('🌙');
-    expect(cloudIcon(100, 0)).toBe('🌙');
+    expect(cloudIcon(0, false)).toBe('🌙');
+    expect(cloudIcon(100, false)).toBe('🌙');
   });
 
   it('steps through the daytime bands at their boundaries', () => {
-    expect(cloudIcon(20, 1)).toBe('☀️');
-    expect(cloudIcon(21, 1)).toBe('⛅');
-    expect(cloudIcon(50, 1)).toBe('⛅');
-    expect(cloudIcon(51, 1)).toBe('🌥️');
-    expect(cloudIcon(80, 1)).toBe('🌥️');
-    expect(cloudIcon(81, 1)).toBe('☁️');
+    expect(cloudIcon(20, true)).toBe('☀️');
+    expect(cloudIcon(21, true)).toBe('⛅');
+    expect(cloudIcon(50, true)).toBe('⛅');
+    expect(cloudIcon(51, true)).toBe('🌥️');
+    expect(cloudIcon(80, true)).toBe('🌥️');
+    expect(cloudIcon(81, true)).toBe('☁️');
   });
 });
 
 describe('haversineKm', () => {
   it('is zero for a point against itself', () => {
-    expect(haversineKm(51.5, -0.1, 51.5, -0.1)).toBe(0);
+    expect(haversineKm({ lat: 51.5, lon: -0.1 }, { lat: 51.5, lon: -0.1 })).toBe(0);
   });
 
   it('matches a known distance (London to Edinburgh)', () => {
-    expect(haversineKm(51.5074, -0.1278, 55.9533, -3.1883)).toBeCloseTo(533.6522, 3);
+    expect(haversineKm({ lat: 51.5074, lon: -0.1278 }, { lat: 55.9533, lon: -3.1883 })).toBeCloseTo(533.6522, 3);
   });
 
   it('gives one degree of latitude as ~111.19 km', () => {
-    expect(haversineKm(0, 0, 1, 0)).toBeCloseTo(111.1949, 3);
+    expect(haversineKm({ lat: 0, lon: 0 }, { lat: 1, lon: 0 })).toBeCloseTo(111.1949, 3);
   });
 
   it('is symmetric', () => {
-    expect(haversineKm(50, -1, 55, -3)).toBeCloseTo(haversineKm(55, -3, 50, -1), 10);
+    expect(haversineKm({ lat: 50, lon: -1 }, { lat: 55, lon: -3 })).toBeCloseTo(haversineKm({ lat: 55, lon: -3 }, { lat: 50, lon: -1 }), 10);
   });
 });
 
