@@ -5,7 +5,7 @@
 This isn't live on GH Pages right now, and won't be until I get the privacy and credits sections sorted. You can build it locally and run via:
 
 1) Clone the GitHub repository
-2) Download Node.js (node.js.org/en/download) and install
+2) Download Node.js (nodejs.org/en/download) and install
 3) Once that is installed, go to the root folder of the repo and do `npm install` 
 4) do `npm run dev`. This will come up with a link to a localhost URL. Click that.
 5) Play around to your heart's content.
