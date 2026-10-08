@@ -1,7 +1,6 @@
 import type { GeoPoint, AllAreas } from './types';
 import { haversineKm } from './geo';
 
-
 export const SUNNY_PCT_THRESHOLD = 90; // top 10% nationally across all years
 export const PEER_PCT_BAND = 2.5; // clicking an area highlights peers within +/- this many percentile points
 export const GEO_RADIUS_KM = 10;
@@ -48,11 +47,12 @@ export function searchAreas(areas: AllAreas, query: string, limit = SEARCH_LIMIT
 // radiusKm, sorted by distance and capped at `limit`, plus how many qualified
 // in total — dense sunny regions (e.g. the south coast) routinely have far
 // more than the cap within range.
-export function findSunnyNear(areas: AllAreas, year: number, point: GeoPoint, {
-  radiusKm = GEO_RADIUS_KM,
-  threshold = SUNNY_PCT_THRESHOLD,
-  limit = GEO_RESULT_LIMIT,
-} = {}) {
+export function findSunnyNear(
+  areas: AllAreas,
+  year: number,
+  point: GeoPoint,
+  { radiusKm = GEO_RADIUS_KM, threshold = SUNNY_PCT_THRESHOLD, limit = GEO_RESULT_LIMIT } = {},
+) {
   const y = `${year}` as const;
   const candidates = [];
   for (const [code, area] of Object.entries(areas)) {

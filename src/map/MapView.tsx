@@ -8,7 +8,12 @@ import Map, {
   type MapLayerMouseEvent,
   type MapRef,
 } from 'react-map-gl/maplibre';
-import type { ExpressionSpecification, FilterSpecification, Map as MaplibreMap } from 'maplibre-gl';
+import type {
+  ExpressionSpecification,
+  FilterSpecification,
+  Map as MaplibreMap,
+  PaddingOptions,
+} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './maplibre.ts';
 import { COLOUR_STOPS } from '../lib/colour.ts';
@@ -16,7 +21,17 @@ import type { Dataset } from '../lib/types.ts';
 import type { MapHighlight } from '../highlight.ts';
 import { MAX_BOUNDS, UK_BOUNDS } from './bounds.ts';
 
-// openfreemap tiles 
+// properties for the map view component
+type Props = {
+  data: Dataset;
+  year: number;
+  highlight: MapHighlight;
+  onAreaClick: (code: string) => void;
+  mapRef: Ref<MapRef>;
+  initialPadding: PaddingOptions;
+};
+
+// openfreemap tiles
 const BASEMAP = 'https://tiles.openfreemap.org/styles/dark';
 // just show town labels and above (i.e. cities, country labels)
 const LABELS_FROM = 'place_town';
@@ -25,8 +40,7 @@ const TILES_URL = `pmtiles://${window.location.origin}${import.meta.env.BASE_URL
 
 const LSOA = { source: 'lsoa', sourceLayer: 'lsoa' } as const;
 
-
-// get the fill colour for the map 
+// get the fill colour for the map
 function fillColour(valueMin: number, valueMax: number): ExpressionSpecification {
   const step = (valueMax - valueMin) / (COLOUR_STOPS.length - 1);
   return [
@@ -50,7 +64,7 @@ function codesFilter(codes: string[]): FilterSpecification {
 }
 
 // draw labels as white rather than dark since otherwise they dont show up on the
-// map properly 
+// map properly
 function brightenLabels(map: MaplibreMap) {
   const layers = map.getStyle().layers;
   const first = layers.findIndex(layer => layer.id === LABELS_FROM);
@@ -76,15 +90,7 @@ function YearColours({ data, year }: { data: Dataset; year: number }) {
   return null;
 }
 
-type Props = {
-  data: Dataset;
-  year: number;
-  highlight: MapHighlight;
-  onAreaClick: (code: string) => void;
-  mapRef: Ref<MapRef>;
-};
-
-export function MapView({ data, year, highlight, onAreaClick, mapRef }: Props) {
+export function MapView({ data, year, highlight, onAreaClick, mapRef, initialPadding }: Props) {
   const { value_min, value_max } = data.meta;
   const fill = useMemo(() => fillColour(value_min, value_max), [value_min, value_max]);
   // only rebuild the filters if the highlight changes
@@ -116,7 +122,7 @@ export function MapView({ data, year, highlight, onAreaClick, mapRef }: Props) {
     <div id="map">
       <Map
         ref={mapRef}
-        initialViewState={{ bounds: UK_BOUNDS }}
+        initialViewState={{ bounds: UK_BOUNDS, fitBoundsOptions: { padding: initialPadding } }}
         maxBounds={MAX_BOUNDS}
         mapStyle={BASEMAP}
         attributionControl={false}
@@ -165,7 +171,12 @@ export function MapView({ data, year, highlight, onAreaClick, mapRef }: Props) {
             source-layer="lsoa"
             beforeId={LABELS_FROM}
             filter={highlightFilter}
-            paint={{ 'line-color': '#03CEA3', 'line-width': 1.5, 'line-opacity': 0.9 }}
+            paint={{
+              'line-color': '#03CEA3',
+              // no outlines at country scale, where they would hide the fill colours
+              'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0, 10, 1.5],
+              'line-opacity': 0.9,
+            }}
           />
           <Layer
             id="lsoa-selected"

@@ -20,19 +20,19 @@ export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'setYear':
       if (action.year === state.year) return state;
-      return {...state, year: action.year, view: {mode: 'idle'}};
+      return { ...state, year: action.year, view: { mode: 'idle' } };
     case 'clickArea':
       if (state.view.mode === 'area' && state.view.code === action.code) {
         return { ...state, view: { mode: 'idle' } };
       }
       return { ...state, view: { mode: 'area', code: action.code } };
     case 'selectArea':
-      return {...state, view: { mode: 'area', code: action.code }};
+      return { ...state, view: { mode: 'area', code: action.code } };
     case 'setRange':
-      return {...state, view: { mode: 'range', range: action.range }};
+      return { ...state, view: { mode: 'range', range: action.range } };
     case 'showGeo':
-      return {...state, view: { mode: 'geo', origin: action.origin, label: action.label }};
+      return { ...state, view: { mode: 'geo', origin: action.origin, label: action.label } };
     case 'clear':
-      return {...state, view: { mode: 'idle' }};
+      return { ...state, view: { mode: 'idle' } };
   }
 }

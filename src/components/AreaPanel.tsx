@@ -24,7 +24,9 @@ export function AreaPanel({ data, year, code }: Props) {
   return (
     <div id="info-area">
       <h2 id="info-name">{area.name}</h2>
-      <p id="info-code" className="info-code">{code}</p>
+      <p id="info-code" className="info-code">
+        {code}
+      </p>
       <div className="info-stat">
         <span className="info-stat-label">Cloud probability</span>
         <span id="info-value" className="info-stat-value">

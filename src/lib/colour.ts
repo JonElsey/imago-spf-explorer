@@ -1,13 +1,18 @@
-
 type RGB = [number, number, number];
-
-
 
 // Ten shades of blue (#1877CF), from pale (sunny, low value) to dark navy
 // (cloudy, high value). Lightness steps evenly in OKLCH colour space
 export const COLOUR_STOPS = [
-  '#d8eaff', '#aed4ff', '#83beff', '#52a6ff', '#398fe7',
-  '#1e79ce', '#0063b3', '#004f91', '#003b70', '#002950',
+  '#d8eaff',
+  '#aed4ff',
+  '#83beff',
+  '#52a6ff',
+  '#398fe7',
+  '#1e79ce',
+  '#0063b3',
+  '#004f91',
+  '#003b70',
+  '#002950',
 ];
 
 export function hexToRgb(hex: string): RGB {

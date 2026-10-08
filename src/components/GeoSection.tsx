@@ -12,9 +12,13 @@ export function GeoSection() {
           autoComplete="off"
           spellCheck={false}
         />
-        <button id="geo-place-btn" className="geo-go-btn" aria-label="Search">&#8594;</button>
+        <button id="geo-place-btn" className="geo-go-btn" aria-label="Search">
+          &#8594;
+        </button>
       </div>
-      <button id="geo-locate-btn" className="sidebar-btn">&#128205; Use my location</button>
+      <button id="geo-locate-btn" className="sidebar-btn">
+        &#128205; Use my location
+      </button>
       <p id="geo-msg" />
     </div>
   );

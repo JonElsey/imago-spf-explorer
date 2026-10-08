@@ -77,7 +77,10 @@ describe('haversineKm', () => {
   });
 
   it('matches a known distance (London to Edinburgh)', () => {
-    expect(haversineKm({ lat: 51.5074, lon: -0.1278 }, { lat: 55.9533, lon: -3.1883 })).toBeCloseTo(533.6522, 3);
+    expect(haversineKm({ lat: 51.5074, lon: -0.1278 }, { lat: 55.9533, lon: -3.1883 })).toBeCloseTo(
+      533.6522,
+      3,
+    );
   });
 
   it('gives one degree of latitude as ~111.19 km', () => {
@@ -85,7 +88,10 @@ describe('haversineKm', () => {
   });
 
   it('is symmetric', () => {
-    expect(haversineKm({ lat: 50, lon: -1 }, { lat: 55, lon: -3 })).toBeCloseTo(haversineKm({ lat: 55, lon: -3 }, { lat: 50, lon: -1 }), 10);
+    expect(haversineKm({ lat: 50, lon: -1 }, { lat: 55, lon: -3 })).toBeCloseTo(
+      haversineKm({ lat: 55, lon: -3 }, { lat: 50, lon: -1 }),
+      10,
+    );
   });
 });
 

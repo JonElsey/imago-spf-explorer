@@ -4,13 +4,12 @@ import { findInRange, findPeers, findSunnyNear } from './lib/selectors.ts';
 import type { AllAreas } from './lib/types.ts';
 import type { State } from './state.ts';
 
-// encode what the map should highlight for the current state 
+// encode what the map should highlight for the current state
 export type MapHighlight = {
   codes: string[]; // drawn at full strength with a teal outline
   selected: string | null; // drawn with a white outline
   dimmed: boolean; // whether every other area fades back
 };
-
 
 export function mapHighlight(areas: AllAreas, { year, view }: State): MapHighlight {
   const y = `${year}` as const;

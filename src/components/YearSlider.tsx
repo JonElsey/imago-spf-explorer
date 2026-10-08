@@ -9,7 +9,9 @@ type Props = {
 export function YearSlider({ years, year, onYearChange }: Props) {
   return (
     <div id="year-selector">
-      <span id="year-min" className="year-bound">{years[0]}</span>
+      <span id="year-min" className="year-bound">
+        {years[0]}
+      </span>
       <input
         id="year-slider"
         type="range"
@@ -20,7 +22,9 @@ export function YearSlider({ years, year, onYearChange }: Props) {
         onChange={e => onYearChange(years[Number(e.target.value)])}
         aria-label="Year"
       />
-      <span id="year-max" className="year-bound">{years[years.length - 1]}</span>
+      <span id="year-max" className="year-bound">
+        {years[years.length - 1]}
+      </span>
       <span id="year-display">{year}</span>
     </div>
   );
