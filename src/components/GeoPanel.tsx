@@ -98,6 +98,12 @@ export function GeoPanel({ areas, year, origin, label, onSelect }: Props) {
           );
         })}
       </div>
+      {/* required by the CC BY 4.0 licence on Open-Meteo's data */}
+      <p className="geo-credit">
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">
+          Weather data by Open-Meteo.com
+        </a>
+      </p>
     </div>
   );
 }

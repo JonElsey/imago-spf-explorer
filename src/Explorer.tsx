@@ -5,6 +5,8 @@ import type { MapRef } from 'react-map-gl/maplibre';
 import { isPanelView, reducer, restoreURLState, type PanelView, type State } from './state.ts';
 import { mapHighlight } from './highlight.ts';
 import { encodeURLState } from './lib/urlState.ts';
+import { aboutSeen } from './lib/aboutSeen.ts';
+import { CREDITS_URL, PRIVACY_URL } from './links.ts';
 import type { Dataset } from './lib/types.ts';
 import { TopBar } from './components/TopBar.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
@@ -18,26 +20,6 @@ import { AreaPanel } from './components/AreaPanel.tsx';
 import { GeoPanel } from './components/GeoPanel.tsx';
 import { MapView } from './map/MapView.tsx';
 import { UK_BOUNDS, isWide, ukPadding } from './map/bounds.ts';
-
-// cache in local storage info about whether the user has been prompted
-// with the info about how the app works
-const ABOUT_SEEN_KEY = 'spf-about-seen';
-
-function aboutSeen() {
-  try {
-    return localStorage.getItem(ABOUT_SEEN_KEY) !== null;
-  } catch {
-    return false;
-  }
-}
-
-function markAboutSeen() {
-  try {
-    localStorage.setItem(ABOUT_SEEN_KEY, '1');
-  } catch {
-    // ignore
-  }
-}
 
 // URL state management. i.e. as the user clicks around, it creates a shareable URL
 // that will show that particular area
@@ -150,6 +132,15 @@ export function Explorer({ data }: { data: Dataset }) {
           >
             Reset view
           </button>
+          <p id="sidebar-links">
+            <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+              Privacy
+            </a>
+            {' · '}
+            <a href={CREDITS_URL} target="_blank" rel="noopener noreferrer">
+              Credits
+            </a>
+          </p>
         </Sidebar>
         <MapView
           data={data}
@@ -182,13 +173,7 @@ export function Explorer({ data }: { data: Dataset }) {
           )}
         </InfoPanel>
       </div>
-      <AboutDialog
-        open={aboutOpen}
-        onClose={() => {
-          setAboutOpen(false);
-          markAboutSeen();
-        }}
-      />
+      <AboutDialog open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 }

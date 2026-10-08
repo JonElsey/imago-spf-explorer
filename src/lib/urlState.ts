@@ -9,7 +9,7 @@ export type URLState = {
   area: string | null; // The selected area code, or null if no area is selected
   range: ValueRange | null; // The selected value range, or null if no range is selected
 };
-// Query string for the current view. 
+// Query string for the current view.
 export function encodeURLState({ year, area, range }: URLState): string {
   const params = new URLSearchParams();
   if (area) params.set('area', area);

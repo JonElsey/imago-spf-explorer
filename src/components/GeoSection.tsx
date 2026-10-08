@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { geocode } from '../lib/geocode.ts';
 import type { GeoPoint } from '../lib/types.ts';
+import { PRIVACY_URL } from '../links.ts';
 
 // "find me a sunny place" part - using location or a place/postcode lookup
 
@@ -84,6 +85,16 @@ export function GeoSection({ onFound }: { onFound: (origin: GeoPoint, label: str
         &#128205; Use my location
       </button>
       {message && <p id="geo-msg">{message}</p>}
+      {/* says where searches go, at the point the data is sent */}
+      <p id="geo-privacy">
+        <i>
+          Place searches are sent to OpenStreetMap. Both options send an approximate location to
+          Open-Meteo.
+        </i>{' '}
+        <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+          Privacy
+        </a>
+      </p>
     </div>
   );
 }

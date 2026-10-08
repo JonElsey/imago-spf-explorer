@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy — SPF Explorer</title>
+    <style>
+      :root {
+        --bg: #0e0e1a;
+        --text: #e2e5f3;
+        --muted: #8c91a8;
+        --teal: #03cea3;
+        --todo: #ff8f42;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 2rem 1rem 4rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 2rem;
+      }
+      a {
+        color: var(--teal);
+      }
+      .todo {
+        color: var(--todo);
+        font-weight: 600;
+      }
+      .muted {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p><a href="./">← Back to the SPF Explorer</a></p>
+
+      <h1>Privacy</h1>
+
+      <p>
+        This page explains what information the SPF Explorer needs to run, where it is sent and why
+        it is needed.
+      </p>
+
+      <h2>Who is responsible</h2>
+      <p>
+        <span class="todo">[Organisation name]</span> is the data controller for this website. You
+        can contact our data protection officer at <span class="todo">[email address]</span>.
+      </p>
+
+      <h2>When you visit</h2>
+      <p>
+        <strong>Hosting.</strong> The site is hosted on GitHub Pages. GitHub may process technical information such as IP addresses. For more information see the
+        <a
+          href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+          >GitHub Privacy Statement</a
+        >.
+      </p>
+      <p> 
+        <strong>Local storage.</strong> The site uses your browser's local storage to store preferences,
+        such as whether you have dismissed the help panel. This information is stored only on your device and is not used 
+        or sent anywhere else.
+      </p>
+      <p>
+        <strong>Background map.</strong> Map information is provided by
+        <a href="https://openfreemap.org/privacy/">OpenFreeMap</a>. OpenFreeMap state that 
+        they do not typically store IP addresses, but they may be logged for security purposes or
+        if errors occur. For more information see the <a href="https://openfreemap.org/privacy/">OpenFreeMap Privacy Policy</a>. 
+      </p>
+      <p>
+        <strong>Visitor statistics.</strong> We use Umami to count visits to the site. 
+        It records the page visited, the
+        referring website, your browser, operating system, device type and country. It
+        does not use cookies and does not store your IP address.
+      </p>
+
+      <h2>When you search for a place</h2>
+      <p>
+        What you type into the place search is sent to
+        <a href="https://osmfoundation.org/wiki/Privacy_Policy">Nominatim</a>, a geocoding service run by the
+        OpenStreetMap Foundation, along with your IP address. This allows the explorer to find the location that you are searching for.
+        See the <a href="https://osmfoundation.org/wiki/Privacy_Policy">Nominatim privacy policy</a> for more information.
+      </p>
+
+      <h2>When you use your location</h2>
+      <p>
+        Your browser will ask for permission to share your location. Your exact location is used
+        inside your browser to find nearby sunny areas and is not stored by Imago. An approximate (rounded to 1 kilometre)
+        location is sent to Open-Meteo to get live weather, as described below.
+      </p>
+
+      <h2>Live weather</h2>
+      <p>
+        When you use "Find me a sunny place", the location you searched for or your own location is
+        rounded to about 1&nbsp;km and sent to <a href="https://open-meteo.com/">Open-Meteo</a>,
+        along with the locations of the nearby sunny areas and your IP address. This is used to get
+        the current cloud cover at each point. Open-Meteo's logs can contain these coordinates and
+        are deleted after 90 days. See the <a href="https://open-meteo.com/en/terms">Open-Meteo privacy policy</a> for more information.
+      </p>
+
+      <h2>Where your information goes</h2>
+      <p>
+        Some of the services above, including GitHub, are based outside the UK, so your information
+        may be processed outside the UK.
+      </p>
+
+      <h2>Your rights</h2>
+      <p>
+        You have rights under data protection law, including the right to access your personal data,
+        the right to rectification, the right to erasure, the right to restrict processing and the
+        right to object to processing. 
+        If you wish to exercise these rights, please contact us using the details provided above.
+      </p>
+      <p>
+        If you are unhappy with how we have handled your information, you can complain to the
+        <a href="https://ico.org.uk/make-a-complaint/">Information Commissioner's Office</a>.
+      </p>
+
+      <p class="muted">Last updated <span>08.10.2026</span>.</p>
+    </main>
+  </body>
+</html>

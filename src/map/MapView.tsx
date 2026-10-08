@@ -20,6 +20,7 @@ import { COLOUR_STOPS } from '../lib/colour.ts';
 import type { Dataset, GeoPoint } from '../lib/types.ts';
 import type { MapHighlight } from '../highlight.ts';
 import { MAX_BOUNDS, UK_BOUNDS } from './bounds.ts';
+import { CREDITS_URL } from '../links.ts';
 
 // properties for the map view component
 type Props = {
@@ -40,6 +41,9 @@ const LABELS_FROM = 'place_town';
 const TILES_URL = `pmtiles://${window.location.origin}${import.meta.env.BASE_URL}tiles/lsoa.pmtiles`;
 
 const LSOA = { source: 'lsoa', sourceLayer: 'lsoa' } as const;
+
+// short credit on the map, linking to the full sources and licences
+const CREDITS = `ONS Open Geography · Imago UKRI · <a href="${CREDITS_URL}" target="_blank" rel="noopener noreferrer">Credits</a>`;
 
 // get the fill colour for the map
 function fillColour(valueMin: number, valueMax: number): ExpressionSpecification {
@@ -155,10 +159,7 @@ export function MapView({
         }}
       >
         <NavigationControl position="top-right" />
-        <AttributionControl
-          position="bottom-right"
-          customAttribution="ONS Open Geography · Imago UKRI"
-        />
+        <AttributionControl position="bottom-right" customAttribution={CREDITS} />
         <Source id="lsoa" type="vector" url={TILES_URL} promoteId="data_zone_code">
           <Layer
             id="lsoa-fill"

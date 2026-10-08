@@ -1,9 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { aboutSeen, saveAboutSeen } from '../lib/aboutSeen.ts';
+import { PRIVACY_URL } from '../links.ts';
 
-// popup about the app shown on first visit, can be re-opened from the sidebar
+// popup about the app shown on every visit until the user ticks "Don't show this
+// again", can be re-opened from the sidebar
 
 export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [dontShow, setDontShow] = useState(aboutSeen);
 
   useEffect(() => {
     const dialog = ref.current;
@@ -13,7 +17,15 @@ export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => v
   }, [open]);
 
   return (
-    <dialog ref={ref} id="about-dialog" aria-labelledby="about-title" onClose={onClose}>
+    <dialog
+      ref={ref}
+      id="about-dialog"
+      aria-labelledby="about-title"
+      onClose={() => {
+        saveAboutSeen(dontShow);
+        onClose();
+      }}
+    >
       <h2 id="about-title">About SPF</h2>
       <p>
         SPF (Sun Probability Framework) estimates how likely each small area in the UK is to be
@@ -32,7 +44,16 @@ export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => v
         sunny place&rdquo; to search near a place, postcode or your location, or drag the
         value-range slider to highlight areas within a chosen band.
       </p>
+      <p>
+        <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+          How this site handles your data
+        </a>
+      </p>
       <form method="dialog">
+        <label id="about-dont-show">
+          <input type="checkbox" checked={dontShow} onChange={e => setDontShow(e.target.checked)} />
+          Don&rsquo;t show this again
+        </label>
         <button className="sidebar-btn">Got it</button>
       </form>
     </dialog>

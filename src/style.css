@@ -211,10 +211,24 @@ body {
   margin-bottom: 0.65rem;
 }
 
+#about-dialog a {
+  color: var(--teal);
+}
+
 #about-dialog .sidebar-btn {
   margin-top: 0.5rem;
   background: var(--teal);
   color: var(--bg-dark);
+}
+
+#about-dont-show {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--grey);
+  cursor: pointer;
 }
 
 /* ── Map ────────────────────────────────────────────────── */
@@ -420,6 +434,16 @@ body {
   margin-top: auto;
 }
 
+#sidebar-links {
+  align-self: center;
+  font-size: 0.75rem;
+  color: var(--grey);
+}
+
+#sidebar-links a {
+  color: var(--grey);
+}
+
 /* ── Geo section (fun) ──────────────────────────────────── */
 
 #geo-section {
@@ -535,6 +559,17 @@ body {
   margin-top: 0.4rem;
 }
 
+#geo-privacy {
+  font-size: 0.7rem;
+  color: var(--grey);
+  line-height: 1.4;
+  margin-top: 0.5rem;
+}
+
+#geo-privacy a {
+  color: var(--grey);
+}
+
 #info-geo-title {
   font-size: 1rem;
   font-weight: 700;
@@ -601,6 +636,15 @@ body {
   color: var(--grey);
   margin-top: 0.1rem;
   display: block;
+}
+
+.geo-credit {
+  margin-top: 0.75rem;
+  font-size: 0.7rem;
+}
+
+.geo-credit a {
+  color: var(--grey);
 }
 
 #geo-weather {
