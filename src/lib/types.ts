@@ -25,3 +25,6 @@ export type Meta = {
   value_col: string;
   code_col: string;
 };
+
+// current weather from open-meteo
+export type Weather = { cloud_cover: number; is_day: number };

@@ -14,10 +14,11 @@ import { RangeSlider } from './components/RangeSlider.tsx';
 import { Legend } from './components/Legend.tsx';
 import { InfoPanel } from './components/InfoPanel.tsx';
 import { AreaPanel } from './components/AreaPanel.tsx';
+import { GeoPanel } from './components/GeoPanel.tsx';
 import { MapView } from './map/MapView.tsx';
 import { UK_BOUNDS, isWide, ukPadding } from './map/bounds.ts';
 
-// cache in local storage info about whether the user has been prompted 
+// cache in local storage info about whether the user has been prompted
 // with the info about how the app works
 const ABOUT_SEEN_KEY = 'spf-about-seen';
 
@@ -77,7 +78,12 @@ export function Explorer({ data }: { data: Dataset }) {
           <button id="about-btn" className="sidebar-btn" onClick={() => setAboutOpen(true)}>
             About SPF
           </button>
-          <GeoSection />
+          <GeoSection
+            onFound={(origin, label) => {
+              dispatch({ type: 'showGeo', origin, label });
+              mapRef.current?.flyTo({ center: [origin.lon, origin.lat], zoom: 11, speed: 1.4 });
+            }}
+          />
           <div id="explore-section">
             <h3>Explore the data</h3>
             <AreaSearch
@@ -117,6 +123,21 @@ export function Explorer({ data }: { data: Dataset }) {
         {state.view.mode === 'area' && (
           <InfoPanel onClose={() => dispatch({ type: 'clear' })}>
             <AreaPanel data={data} year={state.year} code={state.view.code} />
+          </InfoPanel>
+        )}
+        {state.view.mode === 'geo' && (
+          <InfoPanel onClose={() => dispatch({ type: 'clear' })}>
+            <GeoPanel
+              key={`${state.view.origin.lat},${state.view.origin.lon}`}
+              areas={data.areas}
+              year={state.year}
+              origin={state.view.origin}
+              label={state.view.label}
+              onSelect={code => {
+                dispatch({ type: 'selectArea', code });
+                flyToArea(code);
+              }}
+            />
           </InfoPanel>
         )}
       </div>

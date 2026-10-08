@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-// popup about the app shown on first visit, can be re-opened from the sidebar 
+// popup about the app shown on first visit, can be re-opened from the sidebar
 
 export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);

@@ -1,4 +1,4 @@
-// copied pretty much straight over from the original, including all the Claudlish comments 
+// copied pretty much straight over from the original, including all the Claudlish comments
 
 import type { ValueRange } from './types';
 

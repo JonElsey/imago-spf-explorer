@@ -238,10 +238,6 @@ body {
   position: relative;
 }
 
-#info-panel.hidden {
-  display: none;
-}
-
 #info-close {
   position: absolute;
   top: 0.75rem;
@@ -517,10 +513,6 @@ body {
   margin-top: 0.4rem;
 }
 
-#info-area.hidden,
-#info-geo.hidden {
-  display: none;
-}
 
 #info-geo-title {
   font-size: 1rem;
@@ -552,6 +544,11 @@ body {
   transition:
     background 0.12s,
     border-color 0.12s;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+
 }
 
 .geo-result-item:hover {
@@ -576,12 +573,14 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
 }
 
 .geo-result-meta {
   font-size: 0.72rem;
   color: var(--grey);
   margin-top: 0.1rem;
+  display: block;
 }
 
 #geo-weather {

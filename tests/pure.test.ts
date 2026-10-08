@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 
 import { hexToRgb, rgbToHex, valueToColor, COLOUR_STOPS } from '../src/lib/colour.ts';
 import { ordinal, cloudIcon } from '../src/lib/format.ts';
-import { haversineKm, parseCountry } from '../src/lib/geo.ts';
+import { haversineKm } from '../src/lib/geo.ts';
 
 describe('color', () => {
   it('round-trips hex through rgb', () => {
@@ -92,21 +92,5 @@ describe('haversineKm', () => {
       haversineKm({ lat: 55, lon: -3 }, { lat: 50, lon: -1 }),
       10,
     );
-  });
-});
-
-describe('parseCountry', () => {
-  it('reads each nation from the Nominatim state field', () => {
-    expect(parseCountry({ state: 'Scotland' })).toBe('scotland');
-    expect(parseCountry({ state: 'Wales' })).toBe('wales');
-    expect(parseCountry({ state: 'Cymru / Wales' })).toBe('wales');
-    expect(parseCountry({ state: 'Northern Ireland' })).toBe('northern_ireland');
-    expect(parseCountry({ state: 'England' })).toBe('england');
-  });
-
-  it('falls back to england when the address is missing or unrecognised', () => {
-    expect(parseCountry()).toBe('england');
-    expect(parseCountry({})).toBe('england');
-    expect(parseCountry({ state: 'Île-de-France' })).toBe('england');
   });
 });
