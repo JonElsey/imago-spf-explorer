@@ -226,6 +226,13 @@ body {
 /* ── Info panel ─────────────────────────────────────────── */
 
 #info-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 20;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
   width: var(--info-w);
   background: var(--bg-panel);
   border-left: 1px solid rgba(255, 255, 255, 0.07);
@@ -233,9 +240,24 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-  flex-shrink: 0;
   overflow-y: auto;
-  position: relative;
+}
+
+#info-panel.open {
+  transform: none;
+}
+
+/* keep the map's zoom buttons and credits clear of the open panel */
+.maplibregl-ctrl-top-right,
+.maplibregl-ctrl-bottom-right {
+  transition: right 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  #main:has(#info-panel.open) .maplibregl-ctrl-top-right,
+  #main:has(#info-panel.open) .maplibregl-ctrl-bottom-right {
+    right: var(--info-w);
+  }
 }
 
 #info-close {
@@ -513,7 +535,6 @@ body {
   margin-top: 0.4rem;
 }
 
-
 #info-geo-title {
   font-size: 1rem;
   font-weight: 700;
@@ -548,7 +569,6 @@ body {
   text-align: left;
   color: inherit;
   font: inherit;
-
 }
 
 .geo-result-item:hover {
@@ -711,9 +731,11 @@ body {
 @media (max-width: 768px) {
   #info-panel {
     position: fixed;
+    top: auto;
     bottom: 0;
     left: 0;
     right: 0;
+    transform: translateY(100%);
     width: 100%;
     max-height: 70dvh;
     border-left: none;

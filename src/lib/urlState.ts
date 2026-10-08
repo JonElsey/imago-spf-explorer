@@ -1,5 +1,3 @@
-// copied pretty much straight over from the original, including all the Claudlish comments
-
 import type { ValueRange } from './types';
 
 // methods for encoding and decoding the URL query string that represents the current state of the app.
@@ -7,17 +5,16 @@ import type { ValueRange } from './types';
 // and browser navigation.
 
 export type URLState = {
-  year: number | null; // The selected year, or null if the latest year is selected
+  year: number | null; // The selected year, or null if none is given, in which case the latest year is used
   area: string | null; // The selected area code, or null if no area is selected
   range: ValueRange | null; // The selected value range, or null if no range is selected
 };
-// Query string for the current view. If it is the latest year, then no
-// year parameter is appended as this is the default
-export function encodeURLState({ year, area, range }: URLState, latestYear: number): string {
+// Query string for the current view. 
+export function encodeURLState({ year, area, range }: URLState): string {
   const params = new URLSearchParams();
   if (area) params.set('area', area);
   if (range) params.set('range', `${range.lo}-${range.hi}`);
-  if (year !== null && year !== latestYear) params.set('year', String(year));
+  if (year !== null) params.set('year', String(year));
   return params.toString();
 }
 

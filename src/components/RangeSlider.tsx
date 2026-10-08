@@ -11,6 +11,9 @@ type Props = {
 export function RangeSlider({ valueMin, valueMax, range, onRangeChange }: Props) {
   const lo = range?.lo ?? valueMin;
   const hi = range?.hi ?? valueMax;
+  const min = Math.floor(valueMin * 10) / 10;
+  const max = Math.ceil(valueMax * 10) / 10;
+  const clamp = (value: number) => Math.min(Math.max(value, valueMin), valueMax);
   // ensure that sliders dont cross over
   return (
     <div id="range-section">
@@ -19,12 +22,12 @@ export function RangeSlider({ valueMin, valueMax, range, onRangeChange }: Props)
         <input
           id="range-lo"
           type="range"
-          min={valueMin}
-          max={valueMax}
+          min={min}
+          max={max}
           step={0.1}
           value={lo}
           onChange={e => {
-            const value = Number(e.target.value);
+            const value = clamp(Number(e.target.value));
             onRangeChange({ lo: value, hi: Math.max(hi, value) });
           }}
           aria-label="Minimum cloud probability"
@@ -32,12 +35,12 @@ export function RangeSlider({ valueMin, valueMax, range, onRangeChange }: Props)
         <input
           id="range-hi"
           type="range"
-          min={valueMin}
-          max={valueMax}
+          min={min}
+          max={max}
           step={0.1}
           value={hi}
           onChange={e => {
-            const value = Number(e.target.value);
+            const value = clamp(Number(e.target.value));
             onRangeChange({ lo: Math.min(lo, value), hi: value });
           }}
           aria-label="Maximum cloud probability"

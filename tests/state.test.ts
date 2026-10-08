@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
-import { reducer, type State } from '../src/state.ts';
+import { reducer, restoreURLState, type State } from '../src/state.ts';
+import { fixture } from './fixture.ts';
 
 const idle: State = { year: 2025, view: { mode: 'idle' } };
 const area: State = { year: 2025, view: { mode: 'area', code: 'E01000001' } };
@@ -11,11 +12,10 @@ const geo: State = {
 };
 
 describe('setYear', () => {
-  it('changes the year and clears the view', () => {
-    expect(reducer(area, { type: 'setYear', year: 2019 })).toEqual({
-      year: 2019,
-      view: { mode: 'idle' },
-    });
+  it('changes the year and keeps the view', () => {
+    const next = reducer(area, { type: 'setYear', year: 2019 });
+    expect(next.year).toBe(2019);
+    expect(next.view).toBe(area.view);
   });
 
   it('returns the same state when the year is unchanged', () => {
@@ -95,5 +95,27 @@ describe('clear', () => {
 describe('year', () => {
   it('is kept when the view changes', () => {
     expect(reducer(idle, { type: 'selectArea', code: 'E01000001' }).year).toBe(2025);
+  });
+});
+
+describe('restoreURLState', () => {
+  it('starts idle in the latest year with no query', () => {
+    expect(restoreURLState(fixture, '')).toEqual({ year: 2025, view: { mode: 'idle' } });
+  });
+
+  it('restores the year, area and range the URL names', () => {
+    expect(restoreURLState(fixture, '?area=E01031526&year=2020')).toEqual({
+      year: 2020,
+      view: { mode: 'area', code: 'E01031526' },
+    });
+    expect(restoreURLState(fixture, '?range=60-70').view).toEqual({
+      mode: 'range',
+      range: { lo: 60, hi: 70 },
+    });
+  });
+
+  it('ignores area codes that are not in the data', () => {
+    expect(restoreURLState(fixture, '?area=E99999999').view).toEqual({ mode: 'idle' });
+    expect(restoreURLState(fixture, '?area=constructor').view).toEqual({ mode: 'idle' });
   });
 });

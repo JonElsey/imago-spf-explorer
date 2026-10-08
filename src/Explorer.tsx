@@ -1,9 +1,10 @@
 // main entry point for the app. this has the top-level state and the main layout.
 
-import { useDeferredValue, useMemo, useReducer, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import type { MapRef } from 'react-map-gl/maplibre';
-import { reducer } from './state.ts';
+import { isPanelView, reducer, restoreURLState, type PanelView, type State } from './state.ts';
 import { mapHighlight } from './highlight.ts';
+import { encodeURLState } from './lib/urlState.ts';
 import type { Dataset } from './lib/types.ts';
 import { TopBar } from './components/TopBar.tsx';
 import { Sidebar } from './components/Sidebar.tsx';
@@ -34,20 +35,49 @@ function markAboutSeen() {
   try {
     localStorage.setItem(ABOUT_SEEN_KEY, '1');
   } catch {
-    // storage blocked: nothing to remember
+    // ignore
   }
+}
+
+// URL state management. i.e. as the user clicks around, it creates a shareable URL
+// that will show that particular area
+function writeURLState({ year, view }: State) {
+  const qs = encodeURLState({
+    year,
+    area: view.mode === 'area' ? view.code : null,
+    range: view.mode === 'range' ? view.range : null,
+  });
+  history.replaceState({}, '', `?${qs}`);
 }
 
 export function Explorer({ data }: { data: Dataset }) {
   const { years, value_min, value_max } = data.meta;
-  const [state, dispatch] = useReducer(reducer, {
-    year: years[years.length - 1],
-    view: { mode: 'idle' },
-  });
+  const [state, dispatch] = useReducer(reducer, data, d =>
+    restoreURLState(d, window.location.search),
+  );
+
+  // keep the URL in sync with the state with a short delay
+  // so that we can click around without making the URL change each time
+  // this can also be used to share a link and then reload the state
+  // from that link
+  useEffect(() => {
+    const timer = setTimeout(() => writeURLState(state), 300);
+    return () => clearTimeout(timer);
+  }, [state]);
 
   // sidebar starts open on wide screens, closed on mobile
   const [sidebarOpen, setSidebarOpen] = useState(isWide);
   const [aboutOpen, setAboutOpen] = useState(() => !aboutSeen());
+
+  // the panel's area or results, and their year. kept after the view is cleared so
+  // the panel still has something to show while it slides out. updating state
+  // during render is React's way of remembering a previous value: it re-renders
+  // straight away, before drawing
+  const [panel, setPanel] = useState<{ view: PanelView; year: number } | null>(null);
+  if (isPanelView(state.view) && (state.view !== panel?.view || state.year !== panel.year)) {
+    setPanel({ view: state.view, year: state.year });
+  }
+
   const deferredState = useDeferredValue(state);
   const highlight = useMemo(
     () => mapHighlight(data.areas, deferredState),
@@ -62,6 +92,12 @@ export function Explorer({ data }: { data: Dataset }) {
     if (!map) return;
     const { lat, lon } = data.areas[code];
     map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 12), speed: 1.4 });
+  }
+
+  // close the sidebar on mobile if the user has selected something
+  // so it doesnt block the screen
+  function closeDrawerOnMobile() {
+    if (!isWide()) setSidebarOpen(false);
   }
 
   return (
@@ -82,6 +118,7 @@ export function Explorer({ data }: { data: Dataset }) {
             onFound={(origin, label) => {
               dispatch({ type: 'showGeo', origin, label });
               mapRef.current?.flyTo({ center: [origin.lon, origin.lat], zoom: 11, speed: 1.4 });
+              closeDrawerOnMobile();
             }}
           />
           <div id="explore-section">
@@ -91,6 +128,7 @@ export function Explorer({ data }: { data: Dataset }) {
               onSelect={code => {
                 dispatch({ type: 'selectArea', code });
                 flyToArea(code);
+                closeDrawerOnMobile();
               }}
             />
             <RangeSlider
@@ -107,6 +145,7 @@ export function Explorer({ data }: { data: Dataset }) {
             onClick={() => {
               dispatch({ type: 'clear' });
               mapRef.current?.fitBounds(UK_BOUNDS, { padding: ukPadding(sidebarOpen) });
+              closeDrawerOnMobile();
             }}
           >
             Reset view
@@ -116,32 +155,33 @@ export function Explorer({ data }: { data: Dataset }) {
           data={data}
           year={state.year}
           highlight={highlight}
-          onAreaClick={code => dispatch({ type: 'clickArea', code })}
+          onAreaClick={code => {
+            dispatch({ type: 'clickArea', code });
+            closeDrawerOnMobile();
+          }}
           mapRef={mapRef}
           initialPadding={ukPadding(sidebarOpen)}
+          initialArea={state.view.mode === 'area' ? data.areas[state.view.code] : null}
         />
-        {state.view.mode === 'area' && (
-          <InfoPanel onClose={() => dispatch({ type: 'clear' })}>
-            <AreaPanel data={data} year={state.year} code={state.view.code} />
-          </InfoPanel>
-        )}
-        {state.view.mode === 'geo' && (
-          <InfoPanel onClose={() => dispatch({ type: 'clear' })}>
+        <InfoPanel open={isPanelView(state.view)} onClose={() => dispatch({ type: 'clear' })}>
+          {panel?.view.mode === 'area' && (
+            <AreaPanel data={data} year={panel.year} code={panel.view.code} />
+          )}
+          {panel?.view.mode === 'geo' && (
             <GeoPanel
-              key={`${state.view.origin.lat},${state.view.origin.lon}`}
+              key={`${panel.view.origin.lat},${panel.view.origin.lon},${panel.year}`}
               areas={data.areas}
-              year={state.year}
-              origin={state.view.origin}
-              label={state.view.label}
+              year={panel.year}
+              origin={panel.view.origin}
+              label={panel.view.label}
               onSelect={code => {
                 dispatch({ type: 'selectArea', code });
                 flyToArea(code);
               }}
             />
-          </InfoPanel>
-        )}
+          )}
+        </InfoPanel>
       </div>
-      {/* outside the sidebar, which is inert while closed */}
       <AboutDialog
         open={aboutOpen}
         onClose={() => {

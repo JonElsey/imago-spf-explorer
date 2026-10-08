@@ -37,7 +37,6 @@ export function AreaSearch({ areas, onSelect }: Props) {
     <div id="search-section">
       <h4>Find an area</h4>
       <div id="search-container" ref={containerRef}>
-        {/* show a clear button if there's a query, otherwise show a search icon */}
         <input
           id="search-input"
           type="text"

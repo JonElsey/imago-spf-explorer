@@ -17,7 +17,7 @@ import type {
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './maplibre.ts';
 import { COLOUR_STOPS } from '../lib/colour.ts';
-import type { Dataset } from '../lib/types.ts';
+import type { Dataset, GeoPoint } from '../lib/types.ts';
 import type { MapHighlight } from '../highlight.ts';
 import { MAX_BOUNDS, UK_BOUNDS } from './bounds.ts';
 
@@ -29,6 +29,7 @@ type Props = {
   onAreaClick: (code: string) => void;
   mapRef: Ref<MapRef>;
   initialPadding: PaddingOptions;
+  initialArea: GeoPoint | null;
 };
 
 // openfreemap tiles
@@ -90,7 +91,15 @@ function YearColours({ data, year }: { data: Dataset; year: number }) {
   return null;
 }
 
-export function MapView({ data, year, highlight, onAreaClick, mapRef, initialPadding }: Props) {
+export function MapView({
+  data,
+  year,
+  highlight,
+  onAreaClick,
+  mapRef,
+  initialPadding,
+  initialArea,
+}: Props) {
   const { value_min, value_max } = data.meta;
   const fill = useMemo(() => fillColour(value_min, value_max), [value_min, value_max]);
   // only rebuild the filters if the highlight changes
@@ -122,7 +131,12 @@ export function MapView({ data, year, highlight, onAreaClick, mapRef, initialPad
     <div id="map">
       <Map
         ref={mapRef}
-        initialViewState={{ bounds: UK_BOUNDS, fitBoundsOptions: { padding: initialPadding } }}
+        // start at an area restored from the URL, otherwise the whole UK
+        initialViewState={
+          initialArea
+            ? { longitude: initialArea.lon, latitude: initialArea.lat, zoom: 12 }
+            : { bounds: UK_BOUNDS, fitBoundsOptions: { padding: initialPadding } }
+        }
         maxBounds={MAX_BOUNDS}
         mapStyle={BASEMAP}
         attributionControl={false}
