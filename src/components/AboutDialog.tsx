@@ -45,6 +45,13 @@ export function AboutDialog({ open, onClose }: { open: boolean; onClose: () => v
         value-range slider to highlight areas within a chosen band.
       </p>
       <p>
+        The SPF Explorer has been developed by the{' '}
+        <a href="https://imago.ac.uk" target="_blank" rel="noopener noreferrer">
+          Imago team
+        </a>
+        .
+      </p>
+      <p>
         <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
           How this site handles your data
         </a>

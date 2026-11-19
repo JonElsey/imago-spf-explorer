@@ -19,7 +19,7 @@ import './maplibre.ts';
 import { COLOUR_STOPS } from '../lib/colour.ts';
 import type { Dataset, GeoPoint } from '../lib/types.ts';
 import type { MapHighlight } from '../highlight.ts';
-import { MAX_BOUNDS, UK_BOUNDS } from './bounds.ts';
+import { UK_BOUNDS, maxBoundsFor, sidebarInset, type Bounds } from './bounds.ts';
 import { CREDITS_URL } from '../links.ts';
 
 // properties for the map view component
@@ -113,9 +113,19 @@ export function MapView({
     [highlight.selected],
   );
   const [loaded, setLoaded] = useState(false);
+  // set zoom limits based on map size
+  const [maxBounds, setMaxBounds] = useState<Bounds>();
   // area under the cursor
   const hoveredRef = useRef<string | null>(null);
   const [hovering, setHovering] = useState(false);
+
+  function fitMaxBounds(map: MaplibreMap) {
+    const { clientWidth, clientHeight } = map.getContainer();
+    const inset = sidebarInset();
+    // ensure zero-size maps (e.g. when first loading) don't cause NaNs which can lead to crashes
+    if (clientHeight <= 0 || clientWidth <= inset) return;
+    setMaxBounds(maxBoundsFor(clientWidth, clientHeight, inset));
+  }
 
   function setHovered(map: MaplibreMap, code: string | null) {
     if (code === hoveredRef.current) return;
@@ -141,7 +151,7 @@ export function MapView({
             ? { longitude: initialArea.lon, latitude: initialArea.lat, zoom: 12 }
             : { bounds: UK_BOUNDS, fitBoundsOptions: { padding: initialPadding } }
         }
-        maxBounds={MAX_BOUNDS}
+        maxBounds={maxBounds}
         mapStyle={BASEMAP}
         attributionControl={false}
         style={{ width: '100%', height: '100%' }}
@@ -149,8 +159,10 @@ export function MapView({
         cursor={hovering ? 'pointer' : 'grab'}
         onLoad={e => {
           brightenLabels(e.target);
+          fitMaxBounds(e.target);
           setLoaded(true);
         }}
+        onResize={e => fitMaxBounds(e.target)}
         onMouseMove={e => setHovered(e.target, areaCode(e))}
         onMouseLeave={e => setHovered(e.target, null)}
         onClick={e => {

@@ -2,7 +2,6 @@
 
 ## Description
 
-
 ## Type of change
 
 - [ ] Bug fix
@@ -28,5 +27,6 @@ If you would like to be acknowledged in the contributors table, please comment a
 ```
 @all-contributors please add @your-username for code, doc, etc.
 ```
+
 Replace `@your-username` and the contribution types as appropriate.  
 See the [emoji key](https://allcontributors.org/docs/en/emoji-key) for available contribution types.

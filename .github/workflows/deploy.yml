@@ -1,44 +1,63 @@
-name: Deploy to GitHub Pages
+name: Check and deploy
 
 on:
   push:
-    branches: [main, visual-improvements]
-    paths:
-      - 'app/**'
-      - 'tiles/**'
-      - 'data/processed/spf-data.json'
-      - 'assets/**'
-      - 'index.html'
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
   deploy:
+    # only from main, and only once the checks pass
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          # Deploy the entire repo root so that relative paths (../tiles/, etc.)
-          # resolve correctly from app/index.html
-          path: '.'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+      # the data and tiles aren't part of the build, so publish them alongside it.
+      # nothing else in the repository is published
+      - name: Add data and tiles
+        run: |
+          mkdir -p dist/data/processed dist/tiles
+          cp data/processed/spf-data.json dist/data/processed/
+          cp tiles/lsoa.pmtiles dist/tiles/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
         uses: actions/deploy-pages@v4

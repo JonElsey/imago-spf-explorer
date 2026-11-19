@@ -88,8 +88,8 @@ export function GeoSection({ onFound }: { onFound: (origin: GeoPoint, label: str
       {/* says where searches go, at the point the data is sent */}
       <p id="geo-privacy">
         <i>
-          Place searches are sent to OpenStreetMap. Both options send an approximate location to
-          Open-Meteo.
+          An approximate location will be sent to Open-Meteo. Location searches send information to
+          OpenStreetMap's Nominatim service. No location data is stored by the SPF Explorer.
         </i>{' '}
         <a href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">
           Privacy

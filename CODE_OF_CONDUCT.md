@@ -12,6 +12,7 @@ Imago unlocks the potential of satellite imagery to help tackle urgent challenge
 ## 2. Expected Behaviour
 
 All contributors and users should:
+
 - Be welcoming, friendly, and patient with others.
 - Contribute positively; disagree respectfully and debate ideas, not people.
 - Avoid abusive, discriminatory, harassing, or anti-social behaviour (including in-person, online, or through images or data).
